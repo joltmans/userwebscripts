@@ -46,11 +46,12 @@
             } else {
                 $(`#${buttonId}`).text(addAllText);
             }
+            $(`#${buttonId}`).off();
             $(`#${buttonId}`).on("click", function() { triggerClicks(buttons); });
+            $(`#${buttonId}`).on("mouseover", function() { highlightButtons(buttons); });
         } else {
             $(`#${buttonId}`).remove();
         }
-        $(`#${buttonId}`).on("mouseover", function() { highlightButtons(buttons); });
     }
 
     /**
@@ -68,18 +69,19 @@
             } else {
                 $(`#${buttonId}`).text(removeText);
             }
+            $(`#${buttonId}`).off();
             $(`#${buttonId}`).on("click", function() { triggerClicks(buttons); });
+            $(`#${buttonId}`).on("mouseover", function() { highlightButtons(buttons); });
         } else {
             $(`#${buttonId}`).remove();
         }
-        $(`#${buttonId}`).on("mouseover", function() { highlightButtons(buttons); });
     }
 
     /**
      * Get the list of add to cart buttons that match the selector.
      * @param {string} buttonId - The Id of the button that will trigger all the other buttons.
      *                            We have to remove this button from the list to prevent self clicking which will crash or lock up the browser.
-     * @param {Object} sel - The selector object. This stores the buttonsText array that we will use to check our list of buttons against. 
+     * @param {Object} sel - The selector object. This stores the buttonsText array that we will use to check our list of buttons against.
      *                       Only buttons with children with text that match any of our buttonsText entries will be selected.
      */
     function getFilteredButtonsSelection(buttonId, sel) {
@@ -114,10 +116,12 @@
      * @param {Object[]} buttons - List of elements to click.
      */
     function triggerClicks(buttons) {
+        let count=buttons.length;
+        console.log(`Activating ${count} buttons...`);
         var anyClicked = false;
 
-        // No available "Add to Cart" buttons. Cool down and refresh.
-        if (!buttons.length) {
+        // No available buttons.
+        if (!count) {
             console.log(`No buttons to click.`);
             return anyClicked;
         }
@@ -161,7 +165,7 @@
             }
         });
     }
-    
+
     // This function runs periodically to update the add and remove buttons. They are inserted and removed as necessary automatically.
     var pageCheckTimer = setInterval (
     function () {
