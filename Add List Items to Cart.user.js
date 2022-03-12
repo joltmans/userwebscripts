@@ -1,6 +1,7 @@
 // ==UserScript==
 // @name         Add List Items to Cart
 // @namespace    http://tampermonkey.net/
+// @license      MIT
 // @version      0.3
 // @updateURL    https://github.com/joltmans/userwebscripts/blob/main/Add%20List%20Items%20to%20Cart.user.js
 // @downloadURL  https://github.com/joltmans/userwebscripts/blob/main/Add%20List%20Items%20to%20Cart.user.js
