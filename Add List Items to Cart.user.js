@@ -31,6 +31,11 @@
         }
     ];
 
+    /**
+     * Inserts a add all to cart button with the count of items it will add.
+     * @param {string} buttonId - The Id of the button that will trigger all the other buttons.
+     * @param {Object} sel - The selector object.
+     */
     function insertAddAllButton(buttonId, sel) {
         let buttons = getFilteredButtonsSelection(buttonId, sel);
         let count = buttons.length;
@@ -48,6 +53,11 @@
         $(`#${buttonId}`).on("mouseover", function() { highlightButtons(buttons); });
     }
 
+    /**
+     * Inserts a remove all from cart button with the count of items it will remove.
+     * @param {string} buttonId - The Id of the button that will trigger all the other buttons.
+     * @param {Object} sel - The selector object.
+     */
     function insertRemoveAllFromCartButton(buttonId, sel) {
         let buttons = getRemoveButtons(buttonId, sel);
         let count = buttons.length;
@@ -65,6 +75,13 @@
         $(`#${buttonId}`).on("mouseover", function() { highlightButtons(buttons); });
     }
 
+    /**
+     * Get the list of add to cart buttons that match the selector.
+     * @param {string} buttonId - The Id of the button that will trigger all the other buttons.
+     *                            We have to remove this button from the list to prevent self clicking which will crash or lock up the browser.
+     * @param {Object} sel - The selector object. This stores the buttonsText array that we will use to check our list of buttons against. 
+     *                       Only buttons with children with text that match any of our buttonsText entries will be selected.
+     */
     function getFilteredButtonsSelection(buttonId, sel) {
         let buttons = $(sel.selector).filter(function() {
             return sel.buttonsText.indexOf($(this).children().text()) != -1;
@@ -73,16 +90,29 @@
         return buttons;
     }
 
+    /**
+     * Highlight a list of elements.
+     * @param {Object[]} buttons - List of elements to highlight.
+     */
     function highlightButtons(buttons) {
         buttons.css("outline", "5px red dotted");
     }
 
+    /**
+     * Get the list of remove buttons that match the removeSelector.
+     * @param {string} buttonId - The Id of the button that will trigger all the other buttons.
+     *                            We have to remove this button from the list to prevent self clicking which will crash or lock up the browser.
+     * @param {Object} sel - The selector object. This stores the removeSelector that we will check to grab all the elements we need.
+     */
     function getRemoveButtons(buttonId, sel) {
         const buttons = $(sel.removeSelector).not(`#${buttonId}`);
         return buttons;
     }
 
-    // Scan the page for the provided selector and "click" them if present.
+    /**
+     * Trigger a click event on all the elements passed in.
+     * @param {Object[]} buttons - List of elements to click.
+     */
     function triggerClicks(buttons) {
         var anyClicked = false;
 
@@ -101,8 +131,10 @@
         return anyClicked;
     }
 
-
-    function gmMain () {
+    /**
+     * Finds all Add to Cart buttons for each configured site.
+     */
+    function findAddButtons() {
         // function main()
         SELECTORS.forEach((sel) => {
             if (sel.active) {
@@ -115,7 +147,10 @@
         });
     }
 
-    function findCart() {
+    /**
+     * Finds all the cart removal buttons for each configured site.
+     */
+    function findCartRemoveButtons() {
         SELECTORS.forEach((sel) => {
             if (sel.active) {
                 if ($(sel.cartSelector).length > 0)
@@ -127,10 +162,11 @@
         });
     }
     
+    // This function runs periodically to update the add and remove buttons. They are inserted and removed as necessary automatically.
     var pageCheckTimer = setInterval (
     function () {
-        gmMain();
-        findCart();
+        findAddButtons();
+        findCartRemoveButtons();
     }
         , 222
     );
