@@ -1,7 +1,8 @@
 // ==UserScript==
 // @name         Add List Items to Cart
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      0.2
+// @downloadURL    https://github.com/joltmans/userwebscripts/blob/main/Add%20List%20Items%20to%20Cart.user.js
 // @description  Adds all items from a List to cart
 // @author       James Oltmans
 // @match        https://www.walmart.com/lists/*
