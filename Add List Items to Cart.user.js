@@ -1,11 +1,12 @@
 // ==UserScript==
 // @name         Add List Items to Cart
 // @namespace    http://tampermonkey.net/
-// @version      0.2
-// @downloadURL    https://github.com/joltmans/userwebscripts/blob/main/Add%20List%20Items%20to%20Cart.user.js
-// @description  Adds all items from a List to cart
+// @version      0.3
+// @updateURL    https://github.com/joltmans/userwebscripts/blob/main/Add%20List%20Items%20to%20Cart.user.js
+// @downloadURL  https://github.com/joltmans/userwebscripts/blob/main/Add%20List%20Items%20to%20Cart.user.js
+// @description  Adds a button to saved lists to add all items to cart. Also adds a button in the cart to remove all items from cart.
 // @author       James Oltmans
-// @match        https://www.walmart.com/lists/*
+// @match        https://www.walmart.com/*
 // @grant        none
 // @require http://code.jquery.com/jquery-3.4.1.min.js
 // @run-at       document-end
@@ -20,7 +21,7 @@
             site: 'Walmart',
             urls: ['https://www.walmart.com/lists'],
             selector: 'div.main-content button',
-            buttonsText: ['Add to cart'],
+            buttonsText: ['Add to cart', 'Add'],
             loadWait: 2,
             cooldown: 0, // Set to 0 to disable the refresh.
             active: true,
@@ -31,25 +32,14 @@
     ];
 
     function insertAddAllButton(buttonId, sel) {
-        let buttons = getFilteredButtonsSelection(sel);
+        let buttons = getFilteredButtonsSelection(buttonId, sel);
         let count = buttons.length;
-        if (count > 0) {
-            $(sel.linkLocationSelector).first().append(` <button id="${buttonId}">Add all (${count}) to cart</button>`);
-            $(`#${buttonId}`).on("click", function() { triggerClicks(buttons); });
-        } else {
-            $(sel.linkLocationSelector).first().append(` <span id="${buttonId}">( No cart buttons detected. )</span>`);
-        }
-        $(`#${buttonId}`).on("mouseover", function() { highlightButtons(buttons); });
-    }
-
-    function insertRemoveAllFromCartButton(buttonId, sel) {
-        let buttons = getRemoveButtons(buttonId, sel);
-        let count = buttons.length;
+        let addAllText = `Add all (${count}) to cart`;
         if (count > 0) {
             if ($(`#${buttonId}`).length == 0) {
-                $(sel.cartSelector).first().append(` <button id="${buttonId}">Remove all (${count}) from cart</button>`);
+                $(sel.linkLocationSelector).first().append(` <button id="${buttonId}">${addAllText}</button>`);
             } else {
-                $(`#${buttonId}`).text(`Remove all (${count}) from cart`);
+                $(`#${buttonId}`).text(addAllText);
             }
             $(`#${buttonId}`).on("click", function() { triggerClicks(buttons); });
         } else {
@@ -58,10 +48,28 @@
         $(`#${buttonId}`).on("mouseover", function() { highlightButtons(buttons); });
     }
 
-    function getFilteredButtonsSelection(sel) {
+    function insertRemoveAllFromCartButton(buttonId, sel) {
+        let buttons = getRemoveButtons(buttonId, sel);
+        let count = buttons.length;
+        let removeText = `Remove all (${count}) from cart`;
+        if (count > 0) {
+            if ($(`#${buttonId}`).length == 0) {
+                $(sel.cartSelector).first().append(` <button id="${buttonId}">${removeText}</button>`);
+            } else {
+                $(`#${buttonId}`).text(removeText);
+            }
+            $(`#${buttonId}`).on("click", function() { triggerClicks(buttons); });
+        } else {
+            $(`#${buttonId}`).remove();
+        }
+        $(`#${buttonId}`).on("mouseover", function() { highlightButtons(buttons); });
+    }
+
+    function getFilteredButtonsSelection(buttonId, sel) {
         let buttons = $(sel.selector).filter(function() {
             return sel.buttonsText.indexOf($(this).children().text()) != -1;
         });
+        buttons.not(`#${buttonId}`);
         return buttons;
     }
 
@@ -93,40 +101,16 @@
         return anyClicked;
     }
 
-    function waitToClick(sel, callback) {
-        console.log(`Evaluating site ${sel.site} for clickable elements.`);
-        window.setTimeout(() => {
-            callback(sel);
-        }, sel.loadWait * 1000);
-    }
-
-    var pageURLCheckTimer = setInterval (
-    function () {
-        if (this.lastPathStr !== location.pathname
-            || this.lastQueryStr !== location.search
-            || this.lastPathStr === null
-            || this.lastQueryStr === null
-           ) {
-            this.lastPathStr = location.pathname;
-            this.lastQueryStr = location.search;
-            gmMain ();
-        }
-        findCart();
-    }
-        , 222
-    );
-
 
     function gmMain () {
         // function main()
         SELECTORS.forEach((sel) => {
             if (sel.active) {
-                waitToClick(sel, (sel) => {
-                    //highlightButtons(sel);
+                if ($(sel.linkLocationSelector).length > 0)
+                {
                     let buttonId = "AddAllListItemsToCartButton__";
-                    if ($(`#${buttonId}`).length < 1)
-                        insertAddAllButton(buttonId, sel);
-                });
+                    insertAddAllButton(buttonId, sel);
+                }
             }
         });
     }
@@ -142,5 +126,13 @@
             }
         });
     }
+    
+    var pageCheckTimer = setInterval (
+    function () {
+        gmMain();
+        findCart();
+    }
+        , 222
+    );
 
 })();
